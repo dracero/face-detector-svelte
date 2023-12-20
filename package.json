@@ -28,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@mediapipe/tasks-vision": "^0.10.9",
 		"@vite-pwa/sveltekit": "^0.2.1",
 		"idb": "^7.1.1",
 		"kolorist": "^1.8.0",
