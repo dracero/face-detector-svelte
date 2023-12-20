@@ -5,7 +5,7 @@
     FaceDetector,
     FilesetResolver,
     } from "@mediapipe/tasks-vision";
-    
+let score = 0;
 onMount(async () => { 
 
   const demosSection = document.getElementById("demos");
@@ -101,42 +101,6 @@ async function predictWebcam() {
   window.requestAnimationFrame(predictWebcam);
 }
 
-//Taking the photo
-
-if (video) {
-      // Elementos para tomar la foto
-      var canvas = document.getElementById('canvas');
-      var context = canvas.getContext('2d');
-      // Evento de escucha para el botón
-      document.getElementById("snap").addEventListener("click", async function() {
-        context.drawImage(video, 0, 0, 640, 480);
-        const imageBase64 = canvas.toDataURL();
-        console.log(imageBase64);
-        // Ocultar el canvas después de tomar la foto
-        canvas.style.display = 'none';
-        if (navigator.onLine) {
-            // Send the image data to the server
-            const response = await fetch('/api/inPhoto', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ imageData: imageBase64 })
-            });
-            if (response.ok) {
-                console.log("Data inserted successfully");
-            } else {
-                console.error("Error inserting data:", response.statusText); 
-            }
-        } else {
-            // Save the photo locally
-            localStorage.setItem('photo', imageBase64);
-            console.log("Photo saved locally");
-        }
-
-      });
-     }
-
-//End taking the photo
-
 function displayVideoDetections(detections: Detection[]) {
   // Remove any highlighting from previous frame.
 
@@ -152,6 +116,8 @@ function displayVideoDetections(detections: Detection[]) {
       "Confidence: " +
       Math.round(parseFloat(detection.categories[0].score) * 100) +
       "% .";
+      score = Math.round(parseFloat(detection.categories[0].score) * 100)
+
     p.style =
       "left: " +
       (video.offsetWidth -
@@ -190,6 +156,42 @@ function displayVideoDetections(detections: Detection[]) {
     children.push(highlighter);
     children.push(p);
     for (let keypoint of detection.keypoints) {
+         //Taking the photo
+  if (score > 70){
+      document.getElementById("snap").disabled = false;
+      // Elementos para tomar la foto
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      // Evento de escucha para el botón
+      document.getElementById("snap").addEventListener("click", async function() {
+        context.drawImage(video, 0, 0, 640, 480);
+        const imageBase64 = canvas.toDataURL();
+        console.log(imageBase64);
+        // Ocultar el canvas después de tomar la foto
+        canvas.style.display = 'none';
+        if (navigator.onLine) {
+            // Send the image data to the server
+            const response = await fetch('/api/inPhoto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageData: imageBase64 })
+            });
+            if (response.ok) {
+                console.log("Data inserted successfully");
+            } else {
+                console.error("Error inserting data:", response.statusText); 
+            }
+        } else {
+            // Save the photo locally
+            localStorage.setItem('photo', imageBase64);
+            console.log("Photo saved locally");
+        }
+
+      });
+    } else {
+      document.getElementById("snap").disabled = true;
+    }
+//End taking the photo
       const keypointEl = document.createElement("spam");
       keypointEl.className = "key-point";
       keypointEl.style.top = `${keypoint.y * video.offsetHeight - 3}px`;
@@ -236,8 +238,8 @@ window.addEventListener('online', function() {
 			<span class="mdc-button__ripple" />
 			<span class="mdc-button__label">ENABLE WEBCAM</span>
 		</button>
-		<video id="webcam" autoplay playsinline />
     <button id="snap">Snap Photo</button>
+		<video id="webcam" autoplay playsinline />
     <canvas id="canvas" width="640" height="480"></canvas>
 	</div>
 </section>
